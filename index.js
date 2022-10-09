@@ -4,6 +4,7 @@ const http = require('http');
 const server = http.createServer(app);
 const { Server } = require("socket.io");
 const io = new Server(server);
+const shared = require("./public/shared.js");
 const Game = require("./game.js");
 const Player = require("./public/player.js");
 
@@ -37,12 +38,7 @@ io.on("connection", function(socket) {
     });
     socket.on("set-move", function(dir) {
         if (gameID) {
-            let player = games.get(gameID).players[playerID];
-            if (dir.type == "xmove") {
-                player.sync.dir.x = dir.value;
-            } else if (dir.type == "ymove") {
-                player.sync.dir.y = dir.value;
-            }
+            games.get(gameID).players[playerID].sync.dir = shared.normalize(dir);
         }
     });
 });

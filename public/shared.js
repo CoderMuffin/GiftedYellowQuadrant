@@ -24,7 +24,7 @@ let shared = {};
         },
         normalize(obj) {
             let mag = Math.sqrt(obj.x ** 2 + obj.y ** 2);
-            return { x: x, y: y };
+            return { x: obj.x/mag, y: obj.y/mag };
         },
         TagState: {
             Innocent: "Innocent",

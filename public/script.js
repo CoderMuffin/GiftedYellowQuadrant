@@ -114,9 +114,14 @@ function draw() {
     lastTime = now;
 }
 
+window.addEventListener("mousemove", function() {
+    if (socket && mouseIsPressed) {
+        socket.emit("set-move", { x: mouseX - screenWidth/2, y: mouseY - screenHeight/2 });
+    }
+});
 
-window.addEventListener("mousemove", function(e) {
-    if (mouseIsPressed) {
-        socket.emit("set-move", { x: screenWidth/2 - mouseX, y: screenHeight/2 - mouseY });
+window.addEventListener("mouseup", function() {
+    if (socket) {
+        socket.emit("set-move", { x: mouseX - screenWidth/2, y: mouseY - screenHeight/2 });
     }
 });
