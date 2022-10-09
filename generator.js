@@ -35,6 +35,7 @@ class Generator {
         let rooms = [];
         let gs = generationSettings[size];
         this.room(0, 0, 3, 3);
+        rooms.push({ x: 0, y: 0 });
         for (let i = 0; i < roomCount; i++) {
             let x = this.between(-gs.areaSize, gs.areaSize);
             let y = this.between(-gs.areaSize, gs.areaSize);
@@ -65,12 +66,12 @@ class Generator {
         for (x = a.x; (a.x < b.x ? x <= b.x : x >= b.x); x += (a.x < b.x ? 1 : -1)) {
             this.tiles[shared.serialize2D(x, a.y)] = true;
         }
-        this.rects.push([a.x, a.y, x, a.y + 1]);
+        this.rects.push([a.x, a.y, x + 1, a.y + 1]);
         let y;
         for (y = a.y; (a.y < b.y ? y <= b.y : y >= b.y); y += (a.y < b.y ? 1 : -1)) {
             this.tiles[shared.serialize2D(x, y)] = true;
         }
-        this.rects.push([x, a.y, x + 1, y]);
+        this.rects.push([x, a.y, x + 1, y + 1]);
     }
 }
 

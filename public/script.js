@@ -1,7 +1,7 @@
 var socket;
 var players = {};
+var seeds = [];
 var data;
-var tileSize = 50;
 var screenWidth = 800;
 var screenHeight = 600;
 var joined = false;
@@ -36,6 +36,13 @@ function joinGame() {
     });
     socket.on("set-id", function(data) {
         localPlayer = data;
+    })
+    socket.on("set-seeds", function(data) {
+        console.log(data);
+        seeds = data;
+    })
+    socket.on("add-seed", function(data) {
+        seeds.push(data);
     })
     socket.on("hard-sync", function(data) {
         for (var update of data) {
@@ -99,14 +106,17 @@ function draw() {
             translate(-p.sync.pos.x, -p.sync.pos.y);
         }
     }
-    // rectMode(CORNER);
-    // fill(0,255,0);
-    // for (var tile of tiles) {
-    //     rect(tile.x * tileSize, tile.y * tileSize, tileSize, tileSize);
-    // }
     fill(0, 200, 255);
     for (var rect2 of rects) {
-        rect(...rect2.map(x => x * tileSize));
+        let rect3 = rect2.map(x => x * shared.tileSize);
+        //+1 to prevent texture issues (grainy lines)
+        rect3[2] += 1;
+        rect3[3] += 1;
+        rect(...rect3);
+    }
+    fill(200, 255, 0);
+    for (var seed of seeds) {
+        circle(seed.pos.x * shared.tileSize + shared.tileSize / 2, seed.pos.y * shared.tileSize + shared.tileSize / 2, 30);
     }
     for (var player of Object.values(players)) {
         drawPlayer(player);
@@ -122,6 +132,6 @@ window.addEventListener("mousemove", function() {
 
 window.addEventListener("mouseup", function() {
     if (socket) {
-        socket.emit("set-move", { x: mouseX - screenWidth/2, y: mouseY - screenHeight/2 });
+        socket.emit("set-move", { x: 0, y: 0 });
     }
 });

@@ -6,7 +6,8 @@ let Player;
                 score: 0,
                 name: name,
                 pos: { x: 0, y: 0 },
-                dir: { x: 0, y: 0 }
+                dir: { x: 0, y: 0 },
+                tagState: "Innocent" //short for shared.TagState.Innocent
             };
             this.socket = socket;
         }
