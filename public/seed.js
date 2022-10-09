@@ -4,7 +4,6 @@ let Seed;
     class _Seed {
         constructor(pos) {
             this.pos = pos;
-            this.id = Math.random().toString();
         }
     }
     if (typeof window === "undefined") {

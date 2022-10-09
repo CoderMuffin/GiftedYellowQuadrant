@@ -1,7 +1,8 @@
-let shared  = {
+let shared = {
     tileSize: 50,
     tick(players, tiles, delta) {
-        Object.values(players).forEach(function(player) {
+        for (var key in players) {
+            let player = players[key];
             //console.log(player);
             let occupied = (x,y) => tiles[shared.serialize2D(Math.floor(x/shared.tileSize), Math.floor(y/shared.tileSize))];
             let rposx = player.sync.pos.x + player.sync.dir.x * delta * 0.5;
@@ -12,7 +13,7 @@ let shared  = {
             if (occupied(player.sync.pos.x, rposy)) {
                 player.sync.pos.y = rposy;
             }
-        });
+        }
     },
     serialize2D(x, y) {
         return x.toString() + "," + y.toString();

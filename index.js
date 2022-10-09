@@ -41,6 +41,18 @@ io.on("connection", function(socket) {
             games.get(gameID).players[playerID].sync.dir = shared.normalize(dir);
         }
     });
+    socket.on("pop-seed", function(id) {
+        if (gameID) {
+            let game = games.get(gameID)
+            let player = game.players[playerID];
+            player.sync.score += 1;
+            Object.values(game.players).forEach(function(player) {
+                player.socket.emit("pop-seed", id);
+            });
+            game.seedCount--;
+            delete game.seeds[id];
+        }
+    });
 });
 
 server.listen(3000, () => {

@@ -1,6 +1,6 @@
 var socket;
 var players = {};
-var seeds = [];
+var seeds = {};
 var data;
 var screenWidth = 800;
 var screenHeight = 600;
@@ -36,14 +36,16 @@ function joinGame() {
     });
     socket.on("set-id", function(data) {
         localPlayer = data;
-    })
+    });
     socket.on("set-seeds", function(data) {
-        console.log(data);
         seeds = data;
-    })
+    });
     socket.on("add-seed", function(data) {
-        seeds.push(data);
-    })
+        seeds[data.id] = data.data;
+    });
+    socket.on("pop-seed", function(data) {
+        delete seeds[data];
+    });
     socket.on("hard-sync", function(data) {
         for (var update of data) {
             if (players[update.id]) {
@@ -89,7 +91,7 @@ function drawPlayer(m) {
     textAlign(CENTER, CENTER);
     fill(255, 255, 255);
     textSize(24);
-    text(m.sync.name, m.sync.pos.x, m.sync.pos.y - 30);
+    text(m.sync.name+": "+m.sync.score, m.sync.pos.x, m.sync.pos.y - 30);
 }
 
 var lastTime;
@@ -114,9 +116,14 @@ function draw() {
         rect3[3] += 1;
         rect(...rect3);
     }
-    fill(200, 255, 0);
-    for (var seed of seeds) {
-        circle(seed.pos.x * shared.tileSize + shared.tileSize / 2, seed.pos.y * shared.tileSize + shared.tileSize / 2, 30);
+    fill(255, 200, 0);
+    for (var i in seeds) {
+        let coords = [seeds[i].pos.x * shared.tileSize + shared.tileSize / 2, seeds[i].pos.y * shared.tileSize + shared.tileSize / 2];
+        circle(...coords, 30);
+        if (players[localPlayer] && Math.abs(players[localPlayer].sync.pos.x - coords[0]) < shared.tileSize / 2 && Math.abs(players[localPlayer].sync.pos.y - coords[1]) < shared.tileSize / 2) {
+            socket.emit("pop-seed", seeds[i].id);
+            delete seeds[i];
+        }
     }
     for (var player of Object.values(players)) {
         drawPlayer(player);
