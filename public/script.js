@@ -6,7 +6,7 @@ var screenWidth = 800;
 var screenHeight = 600;
 var joined = false;
 var localPlayer;
-var tiles = [];
+var tiles = {};
 var rects = [];
 
 let walls = shared.walls;
@@ -91,7 +91,7 @@ function draw() {
     background(100, 0, 200);
     let now = Date.now();
     let delta = now - lastTime;
-    shared.tick(players, delta);
+    shared.tick(players, tiles, delta);
     translate(screenWidth / 2, screenHeight / 2);
     if (localPlayer) {
         let p = players[localPlayer];
@@ -114,33 +114,9 @@ function draw() {
     lastTime = now;
 }
 
-function getDir(e) {
-    if (e.code == "KeyA" || e.code == "ArrowLeft") {
-        return { type: "xmove", value: -1 };
-    } else if (e.code == "KeyD" || e.code == "ArrowRight") {
-        return { type: "xmove", value: 1 };
-    } else if (e.code == "KeyS" || e.code == "ArrowDown") {
-        return { type: "ymove", value: 1 };
-    } else if (e.code == "KeyW" || e.code == "ArrowUp") {
-        return { type: "ymove", value: -1 };
-    } else {
-        return null;
-    }
-}
 
-window.addEventListener("keydown", function(e) {
-    if (!socket) return;
-    let move = getDir(e);
-    if (move) {
-        socket.emit("set-move", move);
-    }
-});
-
-window.addEventListener("keyup", function(e) {
-    if (!socket) return;
-    let move = getDir(e);
-    if (move) {
-        move.value = 0;
-        socket.emit("set-move", move);
+window.addEventListener("mousemove", function(e) {
+    if (mouseIsPressed) {
+        socket.emit("set-move", { x: screenWidth/2 - mouseX, y: screenHeight/2 - mouseY });
     }
 });

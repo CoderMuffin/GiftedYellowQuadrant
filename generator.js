@@ -1,3 +1,4 @@
+const shared = require("./public/shared.js");
 //room min size and max size are * 2
 const generationSettings = [
     {
@@ -29,7 +30,7 @@ const generationSettings = [
 
 class Generator {
     constructor(roomCount, paths, size) {
-        this.tiles = [];
+        this.tiles = {};
         this.rects = [];
         let rooms = [];
         let gs = generationSettings[size];
@@ -54,7 +55,7 @@ class Generator {
     room(x, y, xs, ys) {
         for (let xp = x - xs; xp < x + xs; xp++) {
             for (let yp = y - ys; yp < y + ys; yp++) {
-                this.tiles.push({ x: xp, y: yp });
+                this.tiles[shared.serialize2D(xp, yp)] = true;
             }
         }
         this.rects.push([x - xs, y - ys, x + xs, y + ys]);
@@ -62,12 +63,12 @@ class Generator {
     path(a, b) {
         let x;
         for (x = a.x; (a.x < b.x ? x <= b.x : x >= b.x); x += (a.x < b.x ? 1 : -1)) {
-            this.tiles.push({ x: x, y: a.y });
+            this.tiles[shared.serialize2D(x, a.y)] = true;
         }
         this.rects.push([a.x, a.y, x, a.y + 1]);
         let y;
         for (y = a.y; (a.y < b.y ? y <= b.y : y >= b.y); y += (a.y < b.y ? 1 : -1)) {
-            this.tiles.push({ x: x, y: y });
+            this.tiles[shared.serialize2D(x, y)] = true;
         }
         this.rects.push([x, a.y, x + 1, y]);
     }

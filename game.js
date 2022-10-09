@@ -10,10 +10,17 @@ class Game {
     }
     start(hardTps) {
         let _this = this;
+        let lastTime = Date.now();
 
-        setInterval(function() {
-            shared.tick(_this.players, 16);
-        }, 16);
+        (function engineTick() {
+            setTimeout(function() {
+                let now = Date.now();
+                let delta = now - lastTime;
+                shared.tick(_this.players, _this.generator.tiles, delta);
+                engineTick();
+                lastTime = now;
+            }, 16);
+        })();
 
         (function hardTick() {
             setTimeout(function() {
@@ -35,7 +42,7 @@ class Game {
     }
     addPlayer(id, player) {
         this.players[id] = player;
-        player.socket.emit("generate", {r: this.generator.rects,t:this.generator.tiles});
+        player.socket.emit("generate", {r: this.generator.rects, t:this.generator.tiles});
     }
     removePlayer(id) {
         delete this.players[id];
