@@ -23,6 +23,10 @@ class Game {
             }, 16);
         })();
 
+        setTimeout(function() {
+            _this.gameOver();
+        }, shared.roundTime);
+
         (function hardTick() {
             setTimeout(function() {
                 _this.hardSync();
@@ -37,6 +41,21 @@ class Game {
         setInterval(function() {
             _this.addSeed();
         }, 100);
+    }
+    gameOver() {
+        let _this = this;
+        let winner = this.players.reduce((prev, current) => (prev.score > current.score) ? prev : current)
+        for (var key in this.players) {
+            this.players[key].sync.pos = { x: 0, y: 0 };
+            this.players[key].sync.score = 0;
+            this.players[key].socket.emit("winner", {
+                name: winner.name,
+                score: winner.score
+            })
+        }
+        setTimeout(function() {
+            _this.gameOver();
+        }, shared.roundTime);
     }
     addSeed(send = true) {
         if (this.seedCount > 150) return;

@@ -83,7 +83,7 @@ function setup() {
 }
 
 function drawPlayer(m) {
-    fill(0,0,255);
+    fill(0, 0, 255);
     push();
     translate(m.sync.pos.x, m.sync.pos.y);
     image(img, -40, -20, 80, 40);
@@ -91,7 +91,7 @@ function drawPlayer(m) {
     textAlign(CENTER, CENTER);
     fill(255, 255, 255);
     textSize(24);
-    text(m.sync.name+": "+m.sync.score, m.sync.pos.x, m.sync.pos.y - 30);
+    text(m.sync.name + ": " + m.sync.score, m.sync.pos.x, m.sync.pos.y - 30);
 }
 
 var lastTime;
@@ -121,7 +121,7 @@ function draw() {
         let coords = [seeds[i].pos.x * shared.tileSize + shared.tileSize / 2, seeds[i].pos.y * shared.tileSize + shared.tileSize / 2];
         circle(...coords, 30);
         if (players[localPlayer] && Math.abs(players[localPlayer].sync.pos.x - coords[0]) < shared.tileSize / 2 && Math.abs(players[localPlayer].sync.pos.y - coords[1]) < shared.tileSize / 2) {
-            socket.emit("pop-seed", seeds[i].id);
+            socket.emit("pop-seed", i);
             delete seeds[i];
         }
     }
@@ -133,7 +133,7 @@ function draw() {
 
 window.addEventListener("mousemove", function() {
     if (socket && mouseIsPressed) {
-        socket.emit("set-move", { x: mouseX - screenWidth/2, y: mouseY - screenHeight/2 });
+        socket.emit("set-move", { x: mouseX - screenWidth / 2, y: mouseY - screenHeight / 2 });
     }
 });
 
