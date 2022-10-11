@@ -9,6 +9,7 @@ class Game {
         this.generator = new Generator(15, 3, 2);
         this.seedCount = 0;
         this.roundStart = Date.now();
+        this.seedValidation = false;
     }
     start(hardTps) {
         let _this = this;

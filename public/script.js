@@ -134,18 +134,29 @@ function draw() {
             delete seeds[i];
         }
     }
-    for (var player of Object.values(players)) {
-        drawPlayer(player);
+    for (var entry of Object.entries(players)) {
+        drawPlayer(entry[1]);
+        if (localPlayer && localPlayer.tagState == shared.TagState.Tagged && entry[0] != localPlayer) {
+            if (Math.abs(players[localPlayer].sync.pos.x - coords[0]) < shared.tileSize / 2 && Math.abs(players[localPlayer].sync.pos.y - coords[1]) < shared.tileSize / 2) {
+                
+            }
+        }
     }
     pop();
     lastTime = now;
-    textSize(100);
+    textSize(48);
     fill(255, 255, 255);
     let time = new Date(roundStart - now + shared.roundTime);
     if (joined) {
         text(time.getMinutes() + ":" + time.getSeconds().toString().padStart(2, "0"), screenWidth / 2, 100);
     }
 }
+
+window.addEventListener("mousedown", function() {
+    if (socket) {
+        socket.emit("set-move", { x: mouseX - screenWidth / 2, y: mouseY - screenHeight / 2 });
+    }
+});
 
 window.addEventListener("mousemove", function() {
     if (socket && mouseIsPressed) {

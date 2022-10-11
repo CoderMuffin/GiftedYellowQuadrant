@@ -43,7 +43,8 @@ io.on("connection", function(socket) {
     });
     socket.on("pop-seed", function(id) {
         if (gameID) {
-            let game = games.get(gameID)
+            let game = games.get(gameID);
+            if (!game.seedValidation) return;
             let player = game.players[playerID];
             if (!game.seeds[id]) {
                 return;
@@ -52,7 +53,7 @@ io.on("connection", function(socket) {
 
             // console.log(player.sync.pos.x - coords[0], player.sync.pos.x, coords[0]);
             // console.log(player.sync.pos.y - coords[1], player.sync.pos.y, coords[1]);
-            if (!(player && Math.abs(player.sync.pos.x - coords[0]) < shared.tileSize && Math.abs(player.sync.pos.y - coords[1]) < shared.tileSize)) {
+            if (!(player && Math.abs(player.sync.pos.x - coords[0]) < shared.tileSize * 2 && Math.abs(player.sync.pos.y - coords[1]) < shared.tileSize * 2)) {
                 return;
             }
 
