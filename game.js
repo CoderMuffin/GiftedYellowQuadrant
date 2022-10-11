@@ -8,10 +8,12 @@ class Game {
         this.seeds = {};
         this.generator = new Generator(15, 3, 2);
         this.seedCount = 0;
+        this.roundStart = Date.now();
     }
     start(hardTps) {
         let _this = this;
         let lastTime = Date.now();
+        this.roundStart = Date.now();
 
         (function engineTick() {
             setTimeout(function() {
@@ -23,7 +25,8 @@ class Game {
             }, 16);
         })();
 
-        setTimeout(function() {
+        setInterval(function() {
+            _this.roundStart = Date.now();
             _this.gameOver();
         }, shared.roundTime);
 
@@ -44,18 +47,18 @@ class Game {
     }
     gameOver() {
         let _this = this;
-        let winner = this.players.reduce((prev, current) => (prev.score > current.score) ? prev : current)
+        let winner = Object.values(this.players).reduce((prev, current) => (prev.sync.score > current.sync.score) ? prev : current, { sync: { score: -1 } })
+        for (var key in this.players) {
+            this.players[key].socket.emit("winner", {
+                name: winner.sync.name,
+                score: winner.sync.score,
+                roundStart: _this.roundStart
+            });
+        }
         for (var key in this.players) {
             this.players[key].sync.pos = { x: 0, y: 0 };
             this.players[key].sync.score = 0;
-            this.players[key].socket.emit("winner", {
-                name: winner.name,
-                score: winner.score
-            })
         }
-        setTimeout(function() {
-            _this.gameOver();
-        }, shared.roundTime);
     }
     addSeed(send = true) {
         if (this.seedCount > 150) return;
@@ -77,6 +80,7 @@ class Game {
         this.players[id] = player;
         player.socket.emit("generate", { r: this.generator.rects, t: this.generator.tiles });
         player.socket.emit("set-seeds", this.seeds);
+        player.socket.emit("set-time", this.roundStart);
     }
     removePlayer(id) {
         delete this.players[id];

@@ -21,7 +21,7 @@ io.on("connection", function(socket) {
             games.get(gameID)?.removePlayer(playerID);
             Object.values(games.get(gameID).players).forEach(function(player) {
                 player.socket.emit("client-disconnect", { id: playerID });
-            })
+            });
         }
     });
     socket.once("join-game", function(args) {
@@ -45,6 +45,17 @@ io.on("connection", function(socket) {
         if (gameID) {
             let game = games.get(gameID)
             let player = game.players[playerID];
+            if (!game.seeds[id]) {
+                return;
+            }
+            let coords = [game.seeds[id].pos.x * shared.tileSize + shared.tileSize / 2, game.seeds[id].pos.y * shared.tileSize + shared.tileSize / 2];
+
+            // console.log(player.sync.pos.x - coords[0], player.sync.pos.x, coords[0]);
+            // console.log(player.sync.pos.y - coords[1], player.sync.pos.y, coords[1]);
+            if (!(player && Math.abs(player.sync.pos.x - coords[0]) < shared.tileSize && Math.abs(player.sync.pos.y - coords[1]) < shared.tileSize)) {
+                return;
+            }
+
             player.sync.score += 1;
             Object.values(game.players).forEach(function(player) {
                 player.socket.emit("pop-seed", id);
@@ -55,6 +66,6 @@ io.on("connection", function(socket) {
     });
 });
 
-server.listen(3000, () => {
+server.listen(3000, function() {
     console.log("Listening");
 });

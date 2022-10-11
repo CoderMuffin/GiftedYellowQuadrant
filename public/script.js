@@ -7,6 +7,7 @@ var screenHeight = 600;
 var joined = false;
 var localPlayer;
 var tiles = {};
+var roundStart = Date.now();
 var rects = [];
 
 let walls = shared.walls;
@@ -37,6 +38,9 @@ function joinGame() {
     socket.on("set-id", function(data) {
         localPlayer = data;
     });
+    socket.on("set-time", function(data) {
+        roundStart = data;
+    });
     socket.on("set-seeds", function(data) {
         seeds = data;
     });
@@ -56,6 +60,10 @@ function joinGame() {
                 players[update.id] = player;
             }
         }
+    });
+    socket.on("winner", function(data) {
+        roundStart = data.roundStart;
+        console.log(data);
     });
     socket.on("client-disconnect", function(data) {
         delete players[data.id];
@@ -79,6 +87,7 @@ function setup() {
     rectMode(CORNERS);
     createCanvas(screenWidth, screenHeight).parent("canvas-container");
     noStroke();
+    textAlign(CENTER, CENTER);
     noSmooth();
 }
 
@@ -88,9 +97,7 @@ function drawPlayer(m) {
     translate(m.sync.pos.x, m.sync.pos.y);
     image(img, -40, -20, 80, 40);
     pop();
-    textAlign(CENTER, CENTER);
     fill(255, 255, 255);
-    textSize(24);
     text(m.sync.name + ": " + m.sync.score, m.sync.pos.x, m.sync.pos.y - 30);
 }
 
@@ -98,9 +105,11 @@ var lastTime;
 
 function draw() {
     background(100, 0, 200);
+    textSize(24);
     let now = Date.now();
     let delta = now - lastTime;
     shared.tick(players, tiles, delta);
+    push();
     translate(screenWidth / 2, screenHeight / 2);
     if (localPlayer) {
         let p = players[localPlayer];
@@ -128,7 +137,14 @@ function draw() {
     for (var player of Object.values(players)) {
         drawPlayer(player);
     }
+    pop();
     lastTime = now;
+    textSize(100);
+    fill(255, 255, 255);
+    let time = new Date(roundStart - now + shared.roundTime);
+    if (joined) {
+        text(time.getMinutes() + ":" + time.getSeconds().toString().padStart(2, "0"), screenWidth / 2, 100);
+    }
 }
 
 window.addEventListener("mousemove", function() {
