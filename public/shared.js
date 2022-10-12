@@ -1,6 +1,6 @@
 let shared = {
     tileSize: 50,
-    roundTime: 0.1666 * 60 * 1000,
+    roundTime: 3 * 60 * 1000,
     tick(players, tiles, delta) {
         for (var key in players) {
             let player = players[key];

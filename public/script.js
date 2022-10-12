@@ -97,7 +97,11 @@ function drawPlayer(m) {
     translate(m.sync.pos.x, m.sync.pos.y);
     image(img, -40, -20, 80, 40);
     pop();
-    fill(255, 255, 255);
+    if (m.sync.tagState == shared.TagState.Tagged) {
+        fill(255, 100, 100);
+    } else {
+        fill(255, 255, 255);
+    }
     text(m.sync.name + ": " + m.sync.score, m.sync.pos.x, m.sync.pos.y - 30);
 }
 
@@ -136,10 +140,12 @@ function draw() {
     }
     for (var entry of Object.entries(players)) {
         drawPlayer(entry[1]);
-        if (localPlayer && localPlayer.tagState == shared.TagState.Tagged && entry[0] != localPlayer) {
-            if (Math.abs(players[localPlayer].sync.pos.x - coords[0]) < shared.tileSize / 2 && Math.abs(players[localPlayer].sync.pos.y - coords[1]) < shared.tileSize / 2) {
-                
+        if (localPlayer && players[localPlayer].sync.tagState == shared.TagState.Tagged && entry[1].sync.tagState == shared.TagState.Innocent && entry[0] != localPlayer) {
+            if (Math.abs(players[localPlayer].sync.pos.x - entry[1].sync.pos.x) < shared.tileSize && Math.abs(players[localPlayer].sync.pos.y - entry[1].sync.pos.y) < shared.tileSize) {
+                socket.emit("tag", entry[0]);
             }
+        } else {
+            console.log(entry[1].sync.tagState, players[localPlayer].sync.tagState)
         }
     }
     pop();

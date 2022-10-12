@@ -10,6 +10,7 @@ class Game {
         this.seedCount = 0;
         this.roundStart = Date.now();
         this.seedValidation = false;
+        this.tagValidation = false;
     }
     start(hardTps) {
         let _this = this;
@@ -78,6 +79,9 @@ class Game {
         }
     }
     addPlayer(id, player) {
+        if (Object.keys(this.players).length == 0) {
+            player.sync.tagState = shared.TagState.Tagged;
+        }
         this.players[id] = player;
         player.socket.emit("generate", { r: this.generator.rects, t: this.generator.tiles });
         player.socket.emit("set-seeds", this.seeds);
