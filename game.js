@@ -51,16 +51,28 @@ class Game {
         let _this = this;
         let winner = Object.values(this.players).reduce((prev, current) => (prev.sync.score > current.sync.score) ? prev : current, { sync: { score: -1 } })
         for (var key in this.players) {
-            this.players[key].socket.emit("winner", {
+            let player = this.players[key];
+            player.sync.speed = 0;
+            player.socket.emit("winner", {
                 name: winner.sync.name,
                 score: winner.sync.score,
                 roundStart: _this.roundStart
             });
         }
-        for (var key in this.players) {
-            this.players[key].sync.pos = { x: 0, y: 0 };
-            this.players[key].sync.score = 0;
-        }
+        setTimeout(function() {
+            console.log("reset");
+            for (var key in _this.players) {
+                let player = _this.players[key];
+                player.sync.pos = { x: 0, y: 0 };
+                player.sync.score = 0;
+                player.sync.invis = false;
+                player.sync.speed = 1;
+                player.speedEnd = 0;
+                player.invisEnd = 0;
+                clearTimeout(player.speedTimeout);
+                clearTimeout(player.invisTimeout);
+            }
+        }, shared.winTime);
     }
     addSeed(send = true) {
         if (this.seedCount > 150) return;
@@ -68,6 +80,12 @@ class Game {
         let id = Math.random().toString();
         let tiles = Object.keys(this.generator.tiles);
         let seed = new Seed(shared.deserialize2D(tiles[Math.floor(Math.random() * tiles.length)]));
+
+        // if (this.seedCount == 1) {
+        //     seed.pos = { x: 2, y: 2 };
+        //     seed.type = "Invis";
+        // }
+
         this.seeds[id] = seed;
         if (send) {
             for (var key in this.players) {
@@ -79,7 +97,7 @@ class Game {
         }
     }
     addPlayer(id, player) {
-        if (Object.keys(this.players).length == 0) {
+        if (!Object.values(this.players).some(x => x.sync.tagState == shared.TagState.Tagged)) {
             player.sync.tagState = shared.TagState.Tagged;
         }
         this.players[id] = player;

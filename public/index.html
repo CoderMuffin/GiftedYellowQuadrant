@@ -8,7 +8,11 @@
                 padding: 0;
                 width: 100%;
                 height: 100%;
+                background-color: black;
                 font-family: "Roboto Mono", monospace;
+            }
+            * {
+                overflow: hidden;
             }
             #container {
                 width: 100%;
@@ -16,6 +20,9 @@
                 display: flex;
                 align-items: center;
                 justify-content: center;
+            }
+            #content {
+                position: relative;
             }
             #canvas-container > * {
                 border-radius: 16px;
@@ -41,6 +48,18 @@
                 border-bottom-right-radius: 99999px;
                 border-left-width: 0;
             }
+            .on-top {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background-color: rgb(100, 0, 200);
+                z-index: 100;
+                opacity: 1;
+                transition: opacity 0.5s;
+                border-radius: 16px;
+            }
             #join-row {
                 max-height: 50px;
                 opacity: 1;
@@ -61,15 +80,24 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.1/p5.min.js"></script>
         <script src="/socket.io/socket.io.js"></script>
         <script src="/player.js"></script>
+        <script src="/seed.js"></script>
         <script src="/shared.js"></script>
         <script src="/script.js"></script>
         <div id="container">
             <div id="content">
-                <h1>beans</h1>
-                <h3 id="info"></h3>
                 <div id="canvas-container"></div>
-                <div id="join-row">
-                    <input id="input-game-id" placeholder="game id (enter anything to create)"/><input id="input-name" placeholder="name"/><button id="button-join" onclick="joinGame()">Join</button>
+                <div id="join-box" class="on-top">
+                    <div id="join-row">
+                        <input id="input-game-id" placeholder="game id (enter anything to create)"/><input id="input-name" placeholder="name"/><button id="button-join" onclick="joinGame()">Join</button>
+                    </div>
+                </div>
+                <div id="win-box" style="display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none" class="on-top">
+                    <div style="width:100%; color:white">
+                        <h2 style="width:100%; text-align:center; font-size:margin: bottom;0; margin-bottom: 1em">Winner</h2>
+                        <h1 style="width:100%; text-align:center; font-size: 5em; margin: 0" id="win-name"></h1>
+                        <img style="width:40%; margin: 0 30%; image-rendering: crisp-edges, pixelated" src="agouti.png"/><br/>
+                        <h3 style="width: 100%; text-align:center">with <span style="font-size: 2em" id="win-score"></span> points</h3>
+                    </div>
                 </div>
             </div>
         </div>

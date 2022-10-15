@@ -7,6 +7,7 @@ const io = new Server(server);
 const shared = require("./public/shared.js");
 const Game = require("./game.js");
 const Player = require("./public/player.js");
+const Seed = require("./public/seed.js");
 
 app.use(express.static("public"));
 
@@ -53,15 +54,39 @@ io.on("connection", function(socket) {
             }
             if (game.seedValidation) {
                 let coords = [game.seeds[id].pos.x * shared.tileSize + shared.tileSize / 2, game.seeds[id].pos.y * shared.tileSize + shared.tileSize / 2];
-
                 // console.log(player.sync.pos.x - coords[0], player.sync.pos.x, coords[0]);
                 // console.log(player.sync.pos.y - coords[1], player.sync.pos.y, coords[1]);
                 if (!(player && Math.abs(player.sync.pos.x - coords[0]) < shared.tileSize * 2 && Math.abs(player.sync.pos.y - coords[1]) < shared.tileSize * 2)) {
                     return;
                 }
-
             }
-            player.sync.score += 1;
+            if (game.seeds[id].type == Seed.SeedType.Normal) {
+                player.sync.score += 1;
+            } else if (game.seeds[id].type == Seed.SeedType.Big) {
+                player.sync.score += 10;
+            } else if (game.seeds[id].type == Seed.SeedType.Invis) {
+                if (player.sync.tagState == shared.TagState.Tagged) {
+                    player.sync.score += 10;
+                } else {
+                    player.sync.invis = true;
+                    player.invisEnd = Math.max(Date.now(), player.invisEnd);
+                    player.invisEnd += 10000;
+                    clearTimeout(player.invisTimeout);
+                    player.invisTimeout = setTimeout(function() {
+                        player.sync.invis = false;
+                        player.invisEnd = 0;
+                    }, player.invisEnd - Date.now());
+                }
+            } else {
+                player.sync.speed = 1.3;
+                player.speedEnd = Math.max(Date.now(), player.speedEnd);
+                player.speedEnd += 10000;
+                clearTimeout(player.speedTimeout);
+                player.speedTimeout = setTimeout(function() {
+                    player.sync.speed = 1;
+                    player.speedEnd = 0;
+                }, player.speedEnd - Date.now());
+            }
             Object.values(game.players).forEach(function(player) {
                 player.socket.emit("pop-seed", id);
             });
@@ -77,13 +102,13 @@ io.on("connection", function(socket) {
         //console.log(tagger != undefined, victim != undefined);
         if (!tagger) return;
         if (!victim) return;
-        //console.log(tagger.sync, victim.sync);
+        //console.log(tagger.sync.tagState, victim.sync.tagState);
         if (game.tagValidation &&
             !(Math.abs(tagger.sync.pos.x - victim.sync.pos.x) < shared.tileSize * 4 &&
                 Math.abs(tagger.sync.pos.y - victim.sync.pos.y) < shared.tileSize * 4)) {
             return;
         }
-        if (tagger.sync.tagState == shared.TagState.Tagged && victim.sync.tagState == shared.TagState.Innocent) {
+        if (tagger.sync.tagState == shared.TagState.Tagged && victim.sync.tagState == shared.TagState.Innocent && !victim.sync.invis) {
             victim.sync.tagState = shared.TagState.Cooldown;
             victim.sync.dir = { x: 0, y: 0 };
             let seedsTake = Math.floor(victim.sync.score / 2);

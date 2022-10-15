@@ -1,13 +1,14 @@
 let shared = {
     tileSize: 50,
     roundTime: 3 * 60 * 1000,
+    winTime: 5 * 1000,
     tick(players, tiles, delta) {
         for (var key in players) {
             let player = players[key];
             //console.log(player);
             let occupied = (x, y) => tiles[shared.serialize2D(Math.floor(x / shared.tileSize), Math.floor(y / shared.tileSize))];
-            let rposx = player.sync.pos.x + player.sync.dir.x * delta * 0.5;
-            let rposy = player.sync.pos.y + player.sync.dir.y * delta * 0.5;
+            let rposx = player.sync.pos.x + player.sync.dir.x * delta * 0.5 * player.sync.speed;
+            let rposy = player.sync.pos.y + player.sync.dir.y * delta * 0.5 * player.sync.speed;
             if (occupied(rposx, player.sync.pos.y)) {
                 player.sync.pos.x = rposx;
             }
